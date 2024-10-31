@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <script>
+        async function sendMessage() {
+            const message = document.getElementById("message").value;
+            const response = await fetch("http://127.0.0.1:8000/task/chat/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ message }),
+            });
+            const data = await response.json();
+            document.getElementById("chat").innerHTML += `<p><strong>You:</strong> ${message}</p>`;
+            document.getElementById("chat").innerHTML += `<p><strong>Bot:</strong> ${data.response} (${data.sentiment})</p>`;
+
+            if (data.response.includes("feedback")) {
+                promptFeedback();
+            }
+        }
+
+        function promptFeedback() {
+            const feedback = prompt("Please provide your feedback:");
+            if (feedback) {
+                // Send feedback to the server (implement in FastAPI)
+                fetch("http://127.0.0.1:8000/task/feedback/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ feedback }),
+                });
+                document.getElementById("chat").innerHTML += `<p><strong>Bot:</strong> Thank you for your feedback!</p>`;
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Chatbot</h1>
+    <div id="chat"></div>
+    <input type="text" id="message" placeholder="Type your message here...">
+    <button onclick="sendMessage()">Send</button>
+</body>
+</html>
